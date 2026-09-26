@@ -1,0 +1,17 @@
+---
+- name: Проверить учебный модуль информации о файле
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    target_path: "{{ playbook_dir }}/sample.txt"
+  tasks:
+    - name: Получить размер файла
+      training_file_info:
+        path: "{{ target_path }}"
+      register: file_result
+
+    - name: Показать результат
+      ansible.builtin.debug:
+        var: file_result
