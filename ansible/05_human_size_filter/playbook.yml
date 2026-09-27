@@ -1,0 +1,39 @@
+---
+- name: Проверить учебный фильтр размера
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    size_cases:
+      - value: 0
+        expected: "0 B"
+      - value: 999
+        expected: "999 B"
+      - value: 1024
+        expected: "1.0 KiB"
+      - value: 1536
+        expected: "1.5 KiB"
+      - value: 1048576
+        expected: "1.0 MiB"
+      - value: 1073741824
+        expected: "1.0 GiB"
+
+  tasks:
+    - name: Показать преобразованные размеры
+      ansible.builtin.debug:
+        msg: "{{ item.value }} bytes -> {{ item.value | training_human_size }}"
+      loop: "{{ size_cases }}"
+      loop_control:
+        label: "{{ item.value }}"
+
+    - name: Проверить результаты фильтра
+      ansible.builtin.assert:
+        that:
+          - (item.value | training_human_size) == item.expected
+        fail_msg: >-
+          Для {{ item.value }} ожидалось {{ item.expected }},
+          получено {{ item.value | training_human_size }}
+        quiet: true
+      loop: "{{ size_cases }}"
+      loop_control:
+        label: "{{ item.value }}"
